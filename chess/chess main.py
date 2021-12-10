@@ -1,5 +1,5 @@
 import pygame as p
- import chessEngine
+from chessengine import chessEngine
 
 WIDTH = HEIGHT = 512
 DIMENSION = 8
@@ -10,7 +10,8 @@ IMAGES = {}
 
 def load_images():
     pieces = {"wP", "wR", "wN", "wB", "wK",
-              "wQ", "wP", "wR", "wN", "wB", "wK", "wQ"}
+              "wQ", "wP", "wR", "wN", "wB", "wK", "wQ", "bP", "bR", "bN", "bB", "bK",
+              "bQ"}
     for piece in pieces:
         IMAGES[piece] = p.image.load("images/" + piece + ".png")
 
@@ -23,13 +24,26 @@ def main():
     gs = chessEngine.GameState()
     load_images()
     running = True
+    sqSelected = ()
+    plyerClicks = []
 
     while running:
 
         for e in p.event.get():
             if e.type == p.QUIT:
                 running = False
-
+            elif e.type == p.MOUSEBUTTONDOWN:
+                location = p.mouse.get_pos()
+                col = location[0]//SQ_SIZE
+                row = location[1]//SQ_SIZE
+                if sqSelected == (row, col):
+                    sqSelected = ()
+                    plyerClicks = ()
+                else:
+                    plyerClicks.append(sqSelected)
+                    sqSelected = (row, col)
+                if len(plyerClicks) == 2:
+                    move = chessEngine.move(plyerClicks[0], plyerClicks[1], gs.board)
         clock.tick(MAX_FPS)
         p.display.flip()
         drawGameState(screen, gs)
@@ -47,7 +61,6 @@ def drawBoard(screen):
             color = colors[((r+c) % 2)]
             p.draw.rect(screen, color, p.Rect(
                 c*SQ_SIZE, r*SQ_SIZE, SQ_SIZE, SQ_SIZE))
-                
 
 
 def drawPieces(screen, board):
